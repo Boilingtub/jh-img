@@ -7,6 +7,8 @@
 #define TEXTURE_DIR(a) "assets/Textures/" a
 void processInput(GLFWwindow *window);
 
+
+
 int main(int argc, char** argv) {
     
     if(argc < 2) {
@@ -45,13 +47,17 @@ int main(int argc, char** argv) {
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        // set blending options
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         // load and generate the texture 
+        stbi_set_flip_vertically_on_load(true);
         int width, height, nrChannels;
         unsigned char* data = stbi_load(argv[1],
-                                        &width, &height, &nrChannels, 0);
+                                        &width, &height, &nrChannels, STBI_rgb_alpha);
         if(data) {
             glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, 
-                         GL_RGB, GL_UNSIGNED_BYTE, data);
+                         GL_RGBA, GL_UNSIGNED_BYTE, data);
             glGenerateMipmap(GL_TEXTURE_2D);
 
         } else {
@@ -65,9 +71,16 @@ int main(int argc, char** argv) {
                                     indices,
                                     sizeof(indices)/sizeof(indices[0])); 
 
-        Shader basicShader(SHADER_DIR("vert.vert"),SHADER_DIR("frag.frag"));  
-        
-        vertexbuffers.draw(basicShader.ID);
+        const std::string embed_frag = 
+            #include "../shaders/frag.frag"
+        ;
+        const std::string embed_vert = 
+            #include "../shaders/vert.vert"
+        ;
+
+        Shader embededbasicShader(embed_vert.c_str(), embed_frag.c_str(), FromString);
+
+        vertexbuffers.draw(embededbasicShader.ID);
 
         // check and call events and swap the buffers
         glfwSwapBuffers(main_window);

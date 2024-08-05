@@ -8,45 +8,61 @@
 #include <sstream>
 #include <iostream>
 
+enum ShaderSource {
+    FromFile,
+    FromString,
+};
+
 class Shader {
     public:
         unsigned int ID;
 
-        Shader(const char* vertexPath, const char* fragmentPath) {//constructor
-            //1. retrieve vertex/fragment shader source code form files
-            std::string vertexCode;
-            std::string fragmentCode;
-            std::ifstream vertexShaderFile;
-            std::ifstream fragmentShaderFile;
+        Shader(const char* vertexPath, const char* fragmentPath, ShaderSource src) {//constructor
+            const char* vertexShaderCode;
+            const char* fragmentShaderCode; 
+            if(src == FromFile) {
+                //1. retrieve vertex/fragment shader source code form files
+                std::string vertexCode;
+                std::string fragmentCode;
+                std::ifstream vertexShaderFile;
+                std::ifstream fragmentShaderFile;
 
-            //ensure ifstream objects can throw exceptions
-            vertexShaderFile.exceptions(std::ifstream::failbit |
+                //ensure ifstream objects can throw exceptions
+                vertexShaderFile.exceptions(std::ifstream::failbit |
                                         std::ifstream::badbit);
-            fragmentShaderFile.exceptions(std::ifstream::failbit |
+                fragmentShaderFile.exceptions(std::ifstream::failbit |
                                         std::ifstream::badbit);
-            try {
-                //open files
-                vertexShaderFile.open(vertexPath);
-                fragmentShaderFile.open(fragmentPath);
+                try {
+                    //open files
+                    vertexShaderFile.open(vertexPath);
+                    fragmentShaderFile.open(fragmentPath);
 
-                std::stringstream vertexShaderStream, fragmentShaderStream;
-                // read files buffer contents into streams
-                vertexShaderStream << vertexShaderFile.rdbuf();
-                fragmentShaderStream << fragmentShaderFile.rdbuf();
-                //close file handlers
-                vertexShaderFile.close();
-                fragmentShaderFile.close();
-                //convert stream into string
-                vertexCode = vertexShaderStream.str();
-                fragmentCode = fragmentShaderStream.str();
-            }
-            catch(std::ifstream::failure e) {
-                std::cout << "ERROR::SHADER::FILE_NOT_SUCCESFULLY_READ" 
-                        << std::endl;
-            }
+                    std::stringstream vertexShaderStream, fragmentShaderStream;
+                    // read files buffer contents into streams
+                    vertexShaderStream << vertexShaderFile.rdbuf();
+                    fragmentShaderStream << fragmentShaderFile.rdbuf();
+                    //close file handlers
+                    vertexShaderFile.close();
+                    fragmentShaderFile.close();
+                    //convert stream into string
+                    vertexCode = vertexShaderStream.str();
+                    fragmentCode = fragmentShaderStream.str();
+                }
+                catch(std::ifstream::failure e) {
+                    std::cout << "ERROR::SHADER::FILE_NOT_SUCCESFULLY_READ" 
+                            << std::endl;
+                }
 
-            const char* vertexShaderCode = vertexCode.c_str();
-            const char* fragmentShaderCode = fragmentCode.c_str();
+                vertexShaderCode = vertexCode.c_str();
+                fragmentShaderCode = fragmentCode.c_str();
+            } 
+            else if(src == FromString) {
+                vertexShaderCode = vertexPath;
+                fragmentShaderCode = fragmentPath;
+            }
+            else {
+                std::cout << "Invalid Shader source Type";
+            }
 
             // 2. compile shaders 
             unsigned int vertex, fragment;
