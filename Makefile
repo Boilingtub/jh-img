@@ -5,7 +5,7 @@ OBJ=objects
 LIBS= -lglfw -lGL
 main: src/main.cpp
 	g++ $(src_files) $(LIBS) -o $(OUT)/main
-	./$(OUT)/main assets/Textures/lava_solidified.jpg
+	./$(OUT)/main assets/Textures/PushDocLogo.png
 
 release: src/main.cpp
 	g++ $(src_files) $(LIBS) -Os -o $(OUT)/main

@@ -55,6 +55,7 @@ class VertexBuffers {
             glBindVertexArray(0);
             glBindBuffer(GL_ARRAY_BUFFER, 0);
             glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+            
 
             VAO = construct_VAO;
             VBO = construct_VBO;
@@ -76,6 +77,12 @@ class VertexBuffers {
                 //4.4 Unbind Vertex array object
             glBindVertexArray(0);
 
+        }
+
+        void unbind() {
+            glDeleteBuffers(1, &VBO);
+            glDeleteBuffers(1, &EBO);
+            glDeleteVertexArrays(1, &VAO);
         }
 
 };
