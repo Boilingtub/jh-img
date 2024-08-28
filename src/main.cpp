@@ -20,6 +20,8 @@ struct Image {
     float scale = 1.0f;
     float displace_x = 0.0f;
     float displace_y = 0.0f;
+    int tex_width = 0;
+    int tex_height = 0;
     Image(char* image_path) {
      //rendering commands hee 
     float vertices[] = {
@@ -47,11 +49,11 @@ struct Image {
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     // load and generate the texture
     //stbi_set_flip_vertically_on_load(false);
-    int width, height, nrChannels;
+    int nrChannels;
     unsigned char* data = stbi_load(image_path,
-                                    &width, &height, &nrChannels, STBI_rgb_alpha);
+                                    &tex_width, &tex_height, &nrChannels, STBI_rgb_alpha);
     if(data) {
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, 
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, tex_width, tex_height, 0, 
                      GL_RGBA, GL_UNSIGNED_BYTE, data);
         glGenerateMipmap(GL_TEXTURE_2D);
     } else {
@@ -67,15 +69,23 @@ struct Image {
     shader = new Shader (embed_vert.c_str(), embed_frag.c_str(), FromString); 
     }
 
-    void apply_transformations() {
+    void apply_transformations(int screen_width, int screen_height) {
+        std::cout << "tex_width = " << tex_width << "  screen_width" << screen_width << "\n";
+        float fin_scale_x = ((float)tex_width/screen_width)*scale;
+        float fin_scale_y = ((float)tex_height/screen_height)*scale;
         glUniform1i(glGetUniformLocation(this->shader->ID, "flip"), flip);
-        glUniform1f(glGetUniformLocation(this->shader->ID, "scale"), scale);
+        glUniform1f(glGetUniformLocation(this->shader->ID, "scale_x"), fin_scale_x);
+        glUniform1f(glGetUniformLocation(this->shader->ID, "scale_y"), fin_scale_y);
         glUniform1f(glGetUniformLocation(this->shader->ID, "displace_x"),displace_x);
         glUniform1f(glGetUniformLocation(this->shader->ID, "displace_y"),displace_y);
     }
     void render(GLFWwindow* main_window) {
         glClear(GL_COLOR_BUFFER_BIT);
-        apply_transformations();
+
+        int screen_width, screen_height;
+        glfwGetWindowSize(main_window ,&screen_width,&screen_height);
+        apply_transformations(screen_width, screen_height);
+
         this->vertexbuffers->draw(this->shader->ID);
         // check and call events and swap the buffers 
         glfwSwapBuffers(main_window);
