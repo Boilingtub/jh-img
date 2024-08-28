@@ -6,4 +6,4 @@ Has basic functions: \
 `f` - flips image around x-axis \
 `+` - zoom's into image \
 `-` = zoom's out of the image \
-`arrow keys` - pan's the image \
+`arrow keys` - pan's the image 
